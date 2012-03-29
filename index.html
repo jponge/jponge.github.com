@@ -67,8 +67,23 @@
     
     var user = "jponge";
     
-    $.getJSON("https://api.github.com/users/" + user, function(userData) {
-      
+    var loadRepositories = function(data) {
+      var reposData = data.data;
+      $.each(reposData, function(index, repoData) {
+        var repoTemplateData = {
+          "url": repoData.html_url,
+          "name": repoData.name,
+          "description": repoData.description,
+          "language": repoData.language,
+          "forks": repoData.forks,
+          "watchers": repoData.watchers
+        };
+        $("#repo-template").tmpl(repoTemplateData).prependTo("#repos");
+      });
+    };
+    
+    var loadProfile = function(data) {
+      var userData = data.data;
       var userTemplateData = {
         "avatar": userData.avatar_url,
         "name": userData.name,
@@ -81,24 +96,11 @@
         "following": userData.following,
         "url": userData.blog
       };
-      $("#header-template").tmpl(userTemplateData).appendTo($("#profile"));
-      
-      $.getJSON("https://api.github.com/users/" + user + "/repos?type=public", function(reposData) {
-        $.each(reposData, function(index, repoData) {
-          var repoTemplateData = {
-            "url": repoData.html_url,
-            "name": repoData.name,
-            "description": repoData.description,
-            "language": repoData.language,
-            "forks": repoData.forks,
-            "watchers": repoData.watchers
-          };
-          $("#repo-template").tmpl(repoTemplateData).prependTo("#repos");
-        });
-      });
-      
-    });    
+      $("#header-template").tmpl(userTemplateData).appendTo($("#profile"));      
+      $.getJSON("https://api.github.com/users/" + user + "/repos?type=public&callback=?", loadRepositories);      
+    };
     
+    $.getJSON("https://api.github.com/users/" + user + "?callback=?", loadProfile);        
   });
 </script>
   
