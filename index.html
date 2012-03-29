@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Julien Ponge on GitHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="bootstrap/css/bootstrap-responsive.min.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" type="text/css" media="screen"> 
+  <script src="jquery-1.7.2.min.js" type="text/javascript"></script>  
+  <script src="jquery.tmpl.min.js" type="text/javascript"></script> 
+</head>
+
+<body>
+<div class="container">
+  <div id="profile"></div>
+  <div class="page-header">
+    <h1>Public repositories</h1>
+  </div>
+  <ul id="repos" class="thumbnails"></ul>
+</div>
+
+<script id="header-template" type="text/x-jquery-tmpl">
+  <div class="page-header">
+    <p>
+      <img src="${avatar}"/>
+    </p>
+    <h1><a href="${url}">${name}</a> <small>on GitHub</small></h1>
+  </div>
+  <div class="row">    
+    <div class="span12">
+      <dl class="dl-horizontal">
+        <dt>Login</dt>
+        <dd><a href="${profile_url}">${login}</a></dd>
+        <dt>Email</dt>
+        <dd><a href="mailto:${email}">${email}</a></dd>
+        <dt>Website</dt>
+        <dd><a href="${url}">${url}</a></dd>
+        <dt>Location</dt>
+        <dd>${lives}</dd>
+        <dt>Repositories</dt>
+        <dd>${repos}</dd>
+        <dt>Followers</dt>
+        <dd>${followers}</dd>
+        <dt>Following</dt>
+        <dd>${following}</dd>
+      </dl>
+    </div>
+  </div>    
+</script>
+
+<script id="repo-template" type="text/x-jquery-tmpl">  
+  <li class="span6">
+    <div class="thumbnail well">
+      <h3><a href="${url}">${name}</a></h3>
+      <p>${description}</p>
+      <p>
+        <i class="icon-edit"></i> Language: ${language} <br/>
+        <i class="icon-share-alt"></i> Forks: ${forks} <br/>
+        <i class="icon-eye-open"></i> Watchers: ${watchers}
+      </p>
+    </div>
+  </li>
+</script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    
+    var user = "jponge";
+    
+    $.getJSON("https://api.github.com/users/" + user, function(userData) {
+      
+      var userTemplateData = {
+        "avatar": userData.avatar_url,
+        "name": userData.name,
+        "email": userData.email,
+        "login": userData.login,
+        "profile_url": userData.html_url,
+        "lives": userData.location,
+        "repos": userData.public_repos,
+        "followers": userData.followers,
+        "following": userData.following,
+        "url": userData.blog
+      };
+      $("#header-template").tmpl(userTemplateData).appendTo($("#profile"));
+      
+      $.getJSON("https://api.github.com/users/" + user + "/repos?type=public", function(reposData) {
+        $.each(reposData, function(index, repoData) {
+          var repoTemplateData = {
+            "url": repoData.html_url,
+            "name": repoData.name,
+            "description": repoData.description,
+            "language": repoData.language,
+            "forks": repoData.forks,
+            "watchers": repoData.watchers
+          };
+          $("#repo-template").tmpl(repoTemplateData).prependTo("#repos");
+        });
+      });
+      
+    });    
+    
+  });
+</script>
+  
+</body>
+</html>
